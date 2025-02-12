@@ -1,0 +1,8 @@
+# config.yml
+battle-pass:
+  level-1:
+    reward: DIAMOND
+    amount: 1
+  level-2:
+    reward: GOLD_INGOT
+    amount: 5
