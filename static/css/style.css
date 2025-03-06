@@ -1,0 +1,126 @@
+/* Основные стили */
+body {
+    margin: 0;
+    padding: 0 20px 80px; /* Добавлен отступ для footer */
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(45deg, #2c3e50, #4ca1af);
+    color: white;
+    min-height: 100vh;
+}
+
+/* Секция новостей */
+.news-section {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 50px; /* Увеличенное расстояние между плитками */
+    margin-top: 30px;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.news-card {
+    position: relative;
+    height: 300px;
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    background-size: cover;
+    background-position: center;
+    transform: rotate(0);
+}
+
+.news-card:hover {
+    transform: rotate(-5deg) scale(1.03);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+}
+
+.particle-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.news-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 25px;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.7));
+    transition: transform 0.3s ease;
+}
+
+.news-card:hover .news-content {
+    transform: translateY(-10%);
+}
+
+/* Нижняя панель (закреплённая) */
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
+.input-group {
+    display: flex;
+    gap: 15px;
+    max-width: 600px;
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+}
+
+#nickname {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    background: #333;
+    color: white;
+    flex: 1;
+}
+
+.btn {
+    padding: 12px 24px;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(105,180,255,0.8);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .news-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .news-card {
+        height: 250px;
+    }
+}

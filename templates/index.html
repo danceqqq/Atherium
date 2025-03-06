@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Игровой Лаунчер</title>
+    <link rel="stylesheet" href="../static/css/style.css">
+    <script src="../static/js/script.js"></script>
+    <script src="../static/js/color-thief.js"></script>
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+    <!-- Секция новостей (сверху) -->
+    <div class="news-section">
+        <h2>Новости и релизы</h2>
+        <div class="news-grid">
+            <div class="news-card" style="background-image: url('../static/img/news1.jpg');">
+                <div class="news-content">
+                    <h3>Новый DLC!</h3>
+                    <p>Обновление с эксклюзивными миссиями...</p>
+                </div>
+            </div>
+            <div class="news-card" style="background-image: url('../static/img/news2.jpg');">
+                <div class="news-content">
+                    <h3>Сезонный пропуск</h3>
+                    <p>Новые косметические предметы...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нижняя панель (закреплённая) -->
+    <div class="footer">
+        <div class="input-group">
+            <input type="text" id="nickname" placeholder="Введите никнейм">
+            <button class="btn" onclick="launchGame()">Запустить</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new QWebChannel(qt.webChannelTransport, (channel) => {
+                window.pyobject = channel.objects.pyobject;
+            });
+        });
+    </script>
+</body>
+</html>
