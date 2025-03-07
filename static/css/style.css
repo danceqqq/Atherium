@@ -1,14 +1,14 @@
-/* Основные стили */
 body {
     margin: 0;
-    padding: 0 20px 80px; /* Добавлен отступ для footer */
+    padding: 0 20px 80px;
     font-family: 'Arial', sans-serif;
     background: linear-gradient(45deg, #2c3e50, #4ca1af);
     color: white;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Секция новостей */
 .news-section {
     flex: 1;
     padding: 40px;
@@ -20,7 +20,7 @@ body {
 .news-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 50px; /* Увеличенное расстояние между плитками */
+    gap: 50px;
     margin-top: 30px;
     max-width: 1200px;
     width: 100%;
@@ -36,6 +36,7 @@ body {
     background-size: cover;
     background-position: center;
     transform: rotate(0);
+    background-color: #333; /* Заглушка, если изображение не загружено */
 }
 
 .news-card:hover {
@@ -67,7 +68,6 @@ body {
     transform: translateY(-10%);
 }
 
-/* Нижняя панель (закреплённая) */
 .footer {
     position: fixed;
     bottom: 0;
@@ -88,6 +88,7 @@ body {
     padding: 15px;
     background: rgba(255,255,255,0.1);
     border-radius: 10px;
+    backdrop-filter: blur(10px);
 }
 
 #nickname {
@@ -97,6 +98,13 @@ body {
     background: #333;
     color: white;
     flex: 1;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+#nickname:focus {
+    background: #444;
+    outline: none;
 }
 
 .btn {
@@ -106,12 +114,14 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: all 0.3s;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(106,16,255,0.5);
 }
 
 .btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(105,180,255,0.8);
+    box-shadow: 0 4px 12px rgba(106,16,255,0.8);
 }
 
 /* Адаптивность */
@@ -122,5 +132,17 @@ body {
 
     .news-card {
         height: 250px;
+    }
+
+    .input-group {
+        padding: 10px;
+    }
+
+    #nickname {
+        padding: 8px 12px;
+    }
+
+    .btn {
+        padding: 8px 12px;
     }
 }
