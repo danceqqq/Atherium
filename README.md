@@ -27,9 +27,8 @@ __________
 
 
 Currect vivison on `Beta3`
-
-
-https://github.com/user-attachments/assets/2d06f4a7-c5fb-4944-95e2-554c53a46de2
+![{21592144-C47B-476E-93DB-CD7CFBD8B6CC}](https://github.com/user-attachments/assets/8f1b8052-fd47-4a49-8aa4-f3169d5f383f)
+![{45443866-F032-45B4-9308-F9F46AC9DA13}](https://github.com/user-attachments/assets/fbc2e657-ac95-4362-86cf-5402fd0828c7)
 
 ______
 
