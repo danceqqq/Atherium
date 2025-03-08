@@ -25,6 +25,14 @@ _____________
 > Изменение новостей и картинок в лаунчере через `news.json` происходит с интервалом 10+ минут.
 __________
 
+
+Currect vivison on `Beta3`
+
+
+https://github.com/user-attachments/assets/2d06f4a7-c5fb-4944-95e2-554c53a46de2
+
+______
+
 Currect vision on `Beta2`
 ![{C30AA2B5-5E59-47D8-9562-0C17F215E681}](https://github.com/user-attachments/assets/d20c0c08-7e98-4a3f-a56f-469f5b6a008d)
 
