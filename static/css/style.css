@@ -2,17 +2,58 @@ body {
     margin: 0;
     padding: 0 20px 80px;
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(45deg, #2c3e50, #4ca1af);
+    background: #562c79;
     color: white;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
+/* Экран загрузки */
+.loader-example {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity 1s;
+}
+
+.loader-block {
+    position: relative;
+    width: 4rem;
+    height: 4rem;
+}
+
+.loader-item {
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    background: white;
+    animation: move 0.5s linear infinite;
+    border-radius: 50%;
+}
+
+@keyframes move {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    70% { opacity: 0; }
+    100% { opacity: 0; }
+}
+
+.loader-item:nth-of-type(1) { top: -2rem; left: -2rem; }
+.loader-item:nth-of-type(2) { top: -2rem; left: 0; animation-delay: -0.0625s; }
+.loader-item:nth-of-type(3) { top: -2rem; left: 2rem; animation-delay: -0.125s; }
+.loader-item:nth-of-type(4) { top: 0; left: 2rem; animation-delay: -0.1875s; }
+.loader-item:nth-of-type(5) { top: 2rem; left: 2rem; animation-delay: -0.25s; }
+.loader-item:nth-of-type(6) { top: 2rem; left: 0; animation-delay: -0.3125s; }
+.loader-item:nth-of-type(7) { top: 2rem; left: -2rem; animation-delay: -0.375s; }
+.loader-item:nth-of-type(8) { top: 0; left: -2rem; animation-delay: -0.4375s; }
+
+/* Основной стиль */
 .news-section {
     flex: 1;
     padding: 40px;
-    display: flex;
+    display: none;
     flex-direction: column;
     align-items: center;
 }
@@ -36,7 +77,7 @@ body {
     background-size: cover;
     background-position: center;
     transform: rotate(0);
-    background-color: #333; /* Заглушка, если изображение не загружено */
+    background-color: #562c79;
 }
 
 .news-card:hover {
@@ -75,8 +116,7 @@ body {
     right: 0;
     padding: 20px;
     background: rgba(0,0,0,0.2);
-    display: flex;
-    justify-content: center;
+    display: none;
     align-items: center;
     z-index: 2;
 }

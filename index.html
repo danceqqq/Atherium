@@ -1,11 +1,38 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>Игровой Лаунчер</title>
+    <link rel="stylesheet" href="file:///[CSS_PATH]/style.css">
 </head>
 <body>
-    <!-- Содержимое будет заменено через setHtml() -->
+    <div class="loader-example">
+        <div class="loader-block">
+            <div class="loader-item"></div>
+            <div class="loader-item"></div>
+            <div class="loader-item"></div>
+            <div class="loader-item"></div>
+            <div class="loader-item"></div>
+            <div class="loader-item"></div>
+            <div class="loader-item"></div>
+            <div class="loader-item"></div>
+        </div>
+    </div>
+
+    <div class="news-section" style="display: none;">
+        <h2>Новости и релизы</h2>
+        <div class="news-grid"></div>
+    </div>
+
+    <div class="footer" style="display: none;">
+        <div class="input-group">
+            <input type="text" id="nickname" placeholder="Введите никнейм">
+            <button class="btn" onclick="launchGame()">Запустить</button>
+        </div>
+    </div>
+
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="file:///[JS_PATH]/script.js"></script>
+    <script src="file:///[JS_PATH]/color-thief.js"></script>
 </body>
 </html>
