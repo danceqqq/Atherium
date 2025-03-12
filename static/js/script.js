@@ -73,8 +73,8 @@ function initialize() {
             // Анимация наклона
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
-                const x = (e.clientX - rect.left - rect.width/2) * 0.03;
-                const y = (e.clientY - rect.top - rect.height/2) * 0.01;
+                const x = (e.clientX - rect.left - rect.width / 2) * 0.03;
+                const y = (e.clientY - rect.top - rect.height / 2) * 0.01;
                 card.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
             });
         };
@@ -83,32 +83,41 @@ function initialize() {
 
 function launchGame() {
     const nickname = document.getElementById('nickname').value || 'Гость';
-    window.pyobject.launchGame(nickname);
-    saveNickname();
+    const closeAfterLaunch = document.getElementById('closeAfterLaunch').checked;
+    window.pyobject.launchGame(nickname, closeAfterLaunch);
+    saveConfig();
 }
 
 function toggleSettings() {
     const settingsMenu = document.querySelector('.settings-menu');
+    const currentRight = window.getComputedStyle(settingsMenu).right;
 
-    if (settingsMenu.style.right === '-300px' || settingsMenu.style.right === '-100%') {
+    if (currentRight === '-300px' || currentRight === '-100%') {
         settingsMenu.style.right = '0';
         settingsMenu.style.opacity = '1';
     } else {
         settingsMenu.style.right = '-300px';
         settingsMenu.style.opacity = '0';
-        saveNickname();
+        saveConfig();
     }
 }
 
-function saveNickname() {
-    const nickname = document.getElementById('nickname').value;
+function saveConfig() {
+    const nickname = document.getElementById('nickname').value || '';
     const remember = document.getElementById('rememberNickname').checked;
+    const closeAfterLaunch = document.getElementById('closeAfterLaunch').checked;
+    const launcherColor = document.getElementById('colorPreview').style.background;
+    window.pyobject.save_to_config(nickname, remember, closeAfterLaunch, launcherColor);
+}
 
-    if (remember) {
-        localStorage.setItem('savedNickname', nickname);
-        localStorage.setItem('rememberNickname', 'true');
-    } else {
-        localStorage.removeItem('savedNickname');
-        localStorage.removeItem('rememberNickname');
-    }
+function closeLauncher() {
+    window.pyobject.close_launcher();
+}
+
+function openColorPicker() {
+    window.pyobject.open_color_picker((newColor) => {
+        document.getElementById('colorPreview').style.background = newColor;
+        document.body.style.background = newColor;
+        saveConfig();
+    });
 }
