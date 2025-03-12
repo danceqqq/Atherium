@@ -9,7 +9,6 @@ body {
     flex-direction: column;
 }
 
-/* Экран загрузки */
 .loader-example {
     position: fixed;
     top: 50%;
@@ -18,44 +17,13 @@ body {
     transition: opacity 1s;
 }
 
-.loader-block {
-    position: relative;
-    width: 4rem;
-    height: 4rem;
-}
-
-.loader-item {
-    position: absolute;
-    width: 2rem;
-    height: 2rem;
-    background: white;
-    animation: move 0.5s linear infinite;
-    border-radius: 50%;
-}
-
-@keyframes move {
-    0% { opacity: 0; }
-    10% { opacity: 1; }
-    70% { opacity: 0; }
-    100% { opacity: 0; }
-}
-
-.loader-item:nth-of-type(1) { top: -2rem; left: -2rem; }
-.loader-item:nth-of-type(2) { top: -2rem; left: 0; animation-delay: -0.0625s; }
-.loader-item:nth-of-type(3) { top: -2rem; left: 2rem; animation-delay: -0.125s; }
-.loader-item:nth-of-type(4) { top: 0; left: 2rem; animation-delay: -0.1875s; }
-.loader-item:nth-of-type(5) { top: 2rem; left: 2rem; animation-delay: -0.25s; }
-.loader-item:nth-of-type(6) { top: 2rem; left: 0; animation-delay: -0.3125s; }
-.loader-item:nth-of-type(7) { top: 2rem; left: -2rem; animation-delay: -0.375s; }
-.loader-item:nth-of-type(8) { top: 0; left: -2rem; animation-delay: -0.4375s; }
-
-/* Основной стиль */
+/* Основное меню */
 .news-section {
     flex: 1;
     padding: 40px;
-    display: none;
-    flex-direction: column;
-    align-items: center;
+    opacity: 0;
+    transform: translateY(100px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .news-grid {
@@ -116,9 +84,9 @@ body {
     right: 0;
     padding: 20px;
     background: rgba(0,0,0,0.2);
-    display: none;
-    align-items: center;
-    z-index: 2;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
 .input-group {
@@ -164,25 +132,33 @@ body {
     box-shadow: 0 4px 12px rgba(106,16,255,0.8);
 }
 
+/* Меню настроек */
+.settings-menu {
+    position: fixed;
+    top: 0;
+    right: -300px;
+    width: 300px;
+    height: 100%;
+    background: rgba(33,33,33, 0.9);
+    padding: 20px;
+    transition: right 0.3s ease, opacity 0.3s ease;
+    z-index: 3;
+}
+
+.settings-content {
+    max-width: 250px;
+    margin: 0 auto;
+}
+
+.checkbox {
+    margin-right: 10px;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
-    .news-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .news-card {
-        height: 250px;
-    }
-
-    .input-group {
-        padding: 10px;
-    }
-
-    #nickname {
-        padding: 8px 12px;
-    }
-
-    .btn {
-        padding: 8px 12px;
-    }
+    .news-card { height: 250px; }
+    .input-group { padding: 10px; }
+    #nickname { padding: 8px 12px; }
+    .btn { padding: 8px 12px; }
+    .settings-menu { right: -100%; width: 100%; }
 }

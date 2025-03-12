@@ -22,21 +22,16 @@ class LauncherWindow(QMainWindow):
         self.web_view = QWebEngineView()
         self.setCentralWidget(self.web_view)
 
-        # Настройки WebView через страницу
         page = self.web_view.page()
         if page:
             settings = page.settings()
-            # Включаем JavaScript
             settings.setAttribute(settings.WebAttribute.JavascriptEnabled, True)
 
         self.channel = QWebChannel()
         self.channel.registerObject("pyobject", self)
         self.web_view.page().setWebChannel(self.channel)
 
-        # Показываем экран загрузки
         self.show_loading_screen()
-
-        # Загружаем данные через 3 секунды
         QTimer.singleShot(3000, self.load_main_content)
 
     def load_main_content(self):
@@ -83,7 +78,6 @@ class LauncherWindow(QMainWindow):
                     70% {{ opacity: 0; }}
                     100% {{ opacity: 0; }}
                 }}
-                /* Позиции элементов */
                 .loader-item:nth-of-type(1) {{ top: -2rem; left: -2rem; }}
                 .loader-item:nth-of-type(2) {{ top: -2rem; left: 0; animation-delay: -0.0625s; }}
                 .loader-item:nth-of-type(3) {{ top: -2rem; left: 2rem; animation-delay: -0.125s; }}
@@ -151,15 +145,15 @@ class LauncherWindow(QMainWindow):
             img_url = item.get("image_url", "")
             if img_url:
                 img_name = os.path.basename(img_url)
-                img_path = os.path.join(IMG_CACHE_DIR, img_name)
-
-                try:
-                    img_data = requests.get(img_url, timeout=5).content
-                    with open(img_path, "wb") as f:
-                        f.write(img_data)
-                    print(f"Успешно загружено изображение: {img_url}")
-                except Exception as e:
-                    print(f"Ошибка загрузки изображения {img_url}: {str(e)}")
+                img_path = os.path.abspath(os.path.join(IMG_CACHE_DIR, img_name)).replace("\\", "/")
+                if not os.path.exists(img_path):
+                    try:
+                        img_data = requests.get(img_url, timeout=5).content
+                        with open(img_path, "wb") as f:
+                            f.write(img_data)
+                        print(f"Успешно загружено изображение: {img_url}")
+                    except Exception as e:
+                        print(f"Ошибка загрузки изображения {img_url}: {str(e)}")
 
     def generate_html(self):
         html = f"""
@@ -169,6 +163,9 @@ class LauncherWindow(QMainWindow):
             <meta charset="UTF-8">
             <title>Игровой Лаунчер</title>
             <link rel="stylesheet" href="file:///{os.path.abspath('static/css/style.css').replace('\\', '/')}">
+            <script src="file:///{os.path.abspath('static/js/script.js').replace('\\', '/')}"></script>
+            <script src="file:///{os.path.abspath('static/js/color-thief.js').replace('\\', '/')}"></script>
+            <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
         </head>
         <body>
             <div class="loader-example">
@@ -183,7 +180,7 @@ class LauncherWindow(QMainWindow):
                     <div class="loader-item"></div>
                 </div>
             </div>
-            <div class="news-section" style="display: none;">
+            <div class="news-section" style="opacity: 0; transform: translateY(100px);">
                 <h2>Новости и релизы</h2>
                 <div class="news-grid">
         """
@@ -210,15 +207,23 @@ class LauncherWindow(QMainWindow):
         html += """
                 </div>
             </div>
-            <div class="footer" style="display: none;">
+            <div class="footer" style="opacity: 0; transform: translateY(50px);">
                 <div class="input-group">
                     <input type="text" id="nickname" placeholder="Введите никнейм">
                     <button class="btn" onclick="launchGame()">Запустить</button>
+                    <button class="btn settings-btn" onclick="toggleSettings()">Настройки ⚙️</button>
                 </div>
             </div>
-            <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
-            <script src="file:///{os.path.abspath('static/js/script.js').replace('\\', '/')}"></script>
-            <script src="file:///{os.path.abspath('static/js/color-thief.js').replace('\\', '/')}"></script>
+            <div class="settings-menu" style="right: -300px; opacity: 0;">
+                <div class="settings-content">
+                    <h3>Настройки</h3>
+                    <label>
+                        <input type="checkbox" id="rememberNickname" class="checkbox">
+                        Запомнить имя пользователя
+                    </label>
+                    <button class="btn" onclick="toggleSettings()">Закрыть</button>
+                </div>
+            </div>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     new QWebChannel(qt.webChannelTransport, (channel) => {
@@ -226,12 +231,24 @@ class LauncherWindow(QMainWindow):
                         initialize();
                     });
 
-                    // Скрываем лоадер и показываем меню через 3 секунды
+                    // Плавное появление меню
                     setTimeout(() => {
                         document.querySelector('.loader-example').style.display = 'none';
-                        document.querySelector('.news-section').style.display = 'flex';
-                        document.querySelector('.footer').style.display = 'flex';
+                        document.querySelector('.news-section').style.opacity = '1';
+                        document.querySelector('.news-section').style.transform = 'translateY(0)';
+                        document.querySelector('.footer').style.opacity = '1';
+                        document.querySelector('.footer').style.transform = 'translateY(0)';
                     }, 3000);
+
+                    // Загрузка сохраненного никнейма
+                    const savedNickname = localStorage.getItem('savedNickname') || '';
+                    const remember = localStorage.getItem('rememberNickname') === 'true';
+                    document.getElementById('nickname').value = savedNickname;
+                    document.getElementById('rememberNickname').checked = remember;
+
+                    // Обработчики для чекбокса и кнопки "Запустить"
+                    document.getElementById('rememberNickname').addEventListener('change', saveNickname);
+                    document.querySelector('.btn').addEventListener('click', saveNickname);
                 });
             </script>
         </body>

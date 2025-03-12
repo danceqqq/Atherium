@@ -67,6 +67,7 @@ function initialize() {
             card.addEventListener('mouseleave', () => {
                 cancelAnimationFrame(animationFrameId);
                 particles.forEach(p => p.life = 0);
+                card.style.transform = 'rotate(0)';
             });
 
             // Анимация наклона
@@ -76,11 +77,6 @@ function initialize() {
                 const y = (e.clientY - rect.top - rect.height/2) * 0.01;
                 card.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
             });
-
-            // Возврат в исходное положение
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'rotate(0)';
-            });
         };
     });
 }
@@ -88,4 +84,31 @@ function initialize() {
 function launchGame() {
     const nickname = document.getElementById('nickname').value || 'Гость';
     window.pyobject.launchGame(nickname);
+    saveNickname();
+}
+
+function toggleSettings() {
+    const settingsMenu = document.querySelector('.settings-menu');
+
+    if (settingsMenu.style.right === '-300px' || settingsMenu.style.right === '-100%') {
+        settingsMenu.style.right = '0';
+        settingsMenu.style.opacity = '1';
+    } else {
+        settingsMenu.style.right = '-300px';
+        settingsMenu.style.opacity = '0';
+        saveNickname();
+    }
+}
+
+function saveNickname() {
+    const nickname = document.getElementById('nickname').value;
+    const remember = document.getElementById('rememberNickname').checked;
+
+    if (remember) {
+        localStorage.setItem('savedNickname', nickname);
+        localStorage.setItem('rememberNickname', 'true');
+    } else {
+        localStorage.removeItem('savedNickname');
+        localStorage.removeItem('rememberNickname');
+    }
 }
