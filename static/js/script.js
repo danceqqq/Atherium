@@ -15,9 +15,8 @@ function initialize() {
             canvas.className = 'particle-canvas';
             card.appendChild(canvas);
 
-            let ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d');
             let particles = [];
-            let animationFrameId;
 
             function initParticles() {
                 canvas.width = card.offsetWidth;
@@ -48,8 +47,8 @@ function initialize() {
                     p.life--;
 
                     if (p.life > 0 && p.alpha > 0) {
-                        ctx.beginPath();
                         ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${p.alpha})`;
+                        ctx.beginPath();
                         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                         ctx.fill();
                     }
@@ -65,12 +64,10 @@ function initialize() {
             });
 
             card.addEventListener('mouseleave', () => {
-                cancelAnimationFrame(animationFrameId);
                 particles.forEach(p => p.life = 0);
                 card.style.transform = 'rotate(0)';
             });
 
-            // Анимация наклона
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
                 const x = (e.clientX - rect.left - rect.width / 2) * 0.03;
@@ -78,46 +75,5 @@ function initialize() {
                 card.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
             });
         };
-    });
-}
-
-function launchGame() {
-    const nickname = document.getElementById('nickname').value || 'Гость';
-    const closeAfterLaunch = document.getElementById('closeAfterLaunch').checked;
-    window.pyobject.launchGame(nickname, closeAfterLaunch);
-    saveConfig();
-}
-
-function toggleSettings() {
-    const settingsMenu = document.querySelector('.settings-menu');
-    const currentRight = window.getComputedStyle(settingsMenu).right;
-
-    if (currentRight === '-300px' || currentRight === '-100%') {
-        settingsMenu.style.right = '0';
-        settingsMenu.style.opacity = '1';
-    } else {
-        settingsMenu.style.right = '-300px';
-        settingsMenu.style.opacity = '0';
-        saveConfig();
-    }
-}
-
-function saveConfig() {
-    const nickname = document.getElementById('nickname').value || '';
-    const remember = document.getElementById('rememberNickname').checked;
-    const closeAfterLaunch = document.getElementById('closeAfterLaunch').checked;
-    const launcherColor = document.getElementById('colorPreview').style.background;
-    window.pyobject.save_to_config(nickname, remember, closeAfterLaunch, launcherColor);
-}
-
-function closeLauncher() {
-    window.pyobject.close_launcher();
-}
-
-function openColorPicker() {
-    window.pyobject.open_color_picker((newColor) => {
-        document.getElementById('colorPreview').style.background = newColor;
-        document.body.style.background = newColor;
-        saveConfig();
     });
 }
