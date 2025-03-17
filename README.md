@@ -31,6 +31,14 @@ _____________
 - ✅ Удалённое изменение новостей в лаунчере через удобный ` news.json `
 > [!NOTE]
 > Изменение новостей и картинок в лаунчере через `news.json` происходит с интервалом 10+ минут.
+______________
+Currect vivison on `Beta6`
+
+![{ED9F631D-CD90-490A-9ABF-7DB678D350C9}](https://github.com/user-attachments/assets/b0423e7f-de8e-4d52-b191-aaeac977b3f4)
+![{127A4DA7-30DA-4A87-91A8-449473E0D878}](https://github.com/user-attachments/assets/e924d550-94aa-46e4-b929-d5006cd3b058)
+
+
+
 __________
 Currect vivison on `Beta5`
 
