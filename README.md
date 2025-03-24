@@ -33,6 +33,11 @@ _____________
 > [!NOTE]
 > Изменение новостей и картинок в лаунчере через `news.json` происходит с интервалом 10+ минут.
 ______________
+Currect vision on `Beta 0.8`
+![{FC79FA54-8DF1-4F3D-93FE-CED059F9E4AB}](https://github.com/user-attachments/assets/e03ea189-5a78-403a-8d41-99eb516a4711)
+![{28A43C6C-4934-48CC-B384-1EAE6DBCA573}](https://github.com/user-attachments/assets/a99f941e-8236-4f09-9720-3b8967f91c6a)
+
+_______________
 Currect vision on `Beta7`
 ![{1A9B014A-DC01-4857-A4F4-74C168FAD30A}](https://github.com/user-attachments/assets/ffd6ea40-e624-4da7-8456-07553255ceea)
 
