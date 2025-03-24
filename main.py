@@ -31,9 +31,6 @@ class LauncherWindow(QMainWindow):
         self.player.setAudioOutput(self.audio_output)
         self.player.mediaStatusChanged.connect(self.handle_media_status)
 
-        # Текущий трек
-        self.current_music = ""
-
         # WebView
         self.web_view = QWebEngineView()
         self.setCentralWidget(self.web_view)
@@ -94,63 +91,81 @@ class LauncherWindow(QMainWindow):
                     except Exception as e:
                         print(f"Ошибка загрузки изображения {img_url}: {str(e)}")
 
-    def load_random_music(self):
+    def load_music_list(self):
         if not os.path.exists(MUSIC_DIR):
-            return
+            return []
 
         music_files = [f for f in os.listdir(MUSIC_DIR) if f.endswith(('.mp3', '.wav'))]
-        if not music_files:
+        music_list = []
+
+        for music_file in music_files:
+            track_name = os.path.splitext(music_file)[0]
+            cover_url = ""
+
+            if os.path.exists(MUSIC_IMG_DIR):
+                for ext in ['.jpg', '.jpeg', '.png']:
+                    img_path = os.path.join(MUSIC_IMG_DIR, f"{track_name}{ext}")
+                    if os.path.exists(img_path):
+                        cover_url = f"file:///{os.path.abspath(img_path).replace('\\', '/')}"
+                        break
+
+            music_list.append({
+                "track_name": track_name,
+                "file_path": os.path.abspath(os.path.join(MUSIC_DIR, music_file)).replace('\\', '/'),
+                "cover_url": cover_url if cover_url else "file:///" + os.path.abspath(
+                    "static/img/no_music.png").replace('\\', '/')
+            })
+
+        return music_list
+
+    def load_random_music(self):
+        music_list = self.load_music_list()
+        if not music_list:
             return
 
-        self.current_music = random.choice(music_files)
-        track_name = os.path.splitext(self.current_music)[0]
-        music_path = os.path.abspath(os.path.join(MUSIC_DIR, self.current_music))
+        selected_track = random.choice(music_list)
+        self.current_music = selected_track["track_name"]
+        music_path = selected_track["file_path"]
 
-        # Поиск обложки
-        cover_url = ""
-        if os.path.exists(MUSIC_IMG_DIR):
-            for ext in ['.jpg', '.jpeg', '.png']:
-                img_path = os.path.join(MUSIC_IMG_DIR, f"{track_name}{ext}")
-                if os.path.exists(img_path):
-                    cover_url = f"file:///{os.path.abspath(img_path).replace('\\', '/')}"
-                    break
-
-        # Обновление интерфейса
-        self.web_view.page().runJavaScript(f"""
-            const musicBanner = document.querySelector('.music-banner');
-            musicBanner.style.backgroundImage = "url('{cover_url}')";
-            document.getElementById('musicTitle').innerText = "{track_name}";
-        """)
-
+        QTimer.singleShot(500, lambda: self.update_music_ui(selected_track))
         self.player.setSource(QUrl.fromLocalFile(music_path))
         QTimer.singleShot(1000, self.player.play)
 
-    def update_music_banner(self):
-        track_name = os.path.splitext(self.current_music)[0]
-        cover_url = ""
+    @Slot(str)
+    def play_selected_track(self, track_name):
+        music_list = self.load_music_list()
+        selected_track = next((t for t in music_list if t["track_name"] == track_name), None)
 
-        # Поиск обложки
-        if os.path.exists(MUSIC_IMG_DIR):
-            for ext in ['.jpg', '.jpeg', '.png']:
-                img_path = os.path.join(MUSIC_IMG_DIR, f"{track_name}{ext}")
-                if os.path.exists(img_path):
-                    cover_url = f"file:///{os.path.abspath(img_path).replace('\\', '/')}"
-                    break
+        if selected_track:
+            self.current_music = track_name
+            self.player.setSource(QUrl.fromLocalFile(selected_track["file_path"]))
+            self.player.play()
+            QTimer.singleShot(100, lambda: self.update_music_ui(selected_track))
 
-        # Обновление интерфейса
+    def update_music_ui(self, track_info):
         self.web_view.page().runJavaScript(f"""
-            const musicBanner = document.querySelector('.music-banner');
-            musicBanner.style.backgroundImage = "url('{cover_url}')";
-            document.getElementById('musicTitle').innerText = "{track_name}";
+            (function() {{
+                const musicBanner = document.querySelector('.music-banner');
+                musicBanner.style.backgroundImage = "url('{track_info['cover_url']}')";
+                document.getElementById('musicTitle').innerText = "{track_info['track_name']}";
+
+                document.querySelectorAll('.music-track').forEach(track => {{
+                    track.classList.remove('active');
+                    if(track.dataset.trackName === "{track_info['track_name']}") {{
+                        track.classList.add('active');
+                    }}
+                }});
+            }})();
         """)
 
     def handle_media_status(self, status):
         if status == QMediaPlayer.MediaStatus.EndOfMedia:
-            QTimer.singleShot(0, self.load_random_music)
+            QTimer.singleShot(2000, self.load_random_music)
 
     def load_main_content(self):
         self.news_data = self.load_news_data(force_update=True)
         self.cache_images()
+        self.music_list = self.load_music_list()
         html_content = self.generate_html()
         self.web_view.setHtml(html_content, QUrl.fromLocalFile(os.path.abspath("index.html")))
         QTimer.singleShot(2000, self.start_music)
@@ -170,6 +185,7 @@ class LauncherWindow(QMainWindow):
                     margin: 0;
                     padding: 0;
                     background: {loader_color};
+                    overflow: hidden;
                 }}
                 .loader {{
                     position: fixed;
@@ -208,6 +224,15 @@ class LauncherWindow(QMainWindow):
         volume = config.get("music_volume", 50)
         color = config.get("launcher_color", "#562c79")
 
+        music_list_html = ""
+        for track in self.music_list:
+            music_list_html += f"""
+            <div class="music-track" data-track-name="{track['track_name']}" onclick="window.pyobject.play_selected_track('{track['track_name']}')">
+                <img src="{track['cover_url']}" onerror="this.src='file:///{os.path.abspath('static/img/no_music.png').replace('\\', '/')}'">
+                <h4>{track['track_name']}</h4>
+            </div>
+            """
+
         html = f"""
         <!DOCTYPE html>
         <html>
@@ -219,14 +244,20 @@ class LauncherWindow(QMainWindow):
             <script src="file:///{os.path.abspath('static/js/color-thief.js').replace('\\', '/')}"></script>
             <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
         </head>
-        <body style="background: {color};">
+        <body style="background: {color}; overflow: hidden;">
             <!-- Верхняя панель -->
             <div class="top-bar">
                 <div class="exit-btn" onclick="closeLauncher()">×</div>
             </div>
 
-            <!-- Новости -->
-            <div class="news-section">
+            <!-- Вкладки -->
+            <div class="tabs">
+                <div class="tab active" onclick="showNews()">Новости и релизы</div>
+                <div class="tab" onclick="showMusic()">Музыка</div>
+            </div>
+
+            <!-- Секция новостей -->
+            <div class="news-section active-section">
                 <h2>Новости и релизы</h2>
                 <div class="news-grid">
         """
@@ -253,7 +284,19 @@ class LauncherWindow(QMainWindow):
                 else:
                     html += "<div class='news-card'><p>Отсутствует image_url</p></div>"
 
-        html += f"""
+        html += """
+                </div>
+            </div>
+
+            <!-- Секция музыки -->
+            <div class="music-section">
+                <div class="music-header">
+                    <h2>Список треков</h2>
+                </div>
+                <div class="music-list-container">
+                    <div class="music-list">
+        """ + music_list_html + """
+                    </div>
                 </div>
             </div>
 
@@ -305,6 +348,21 @@ class LauncherWindow(QMainWindow):
                     window.pyobject = channel.objects.pyobject;
                     initialize();
                 }});
+
+                // Переключение вкладок
+                function showNews() {{
+                    document.querySelector('.news-section').style.display = 'block';
+                    document.querySelector('.music-section').style.display = 'none';
+                    document.querySelectorAll('.tab')[0].classList.add('active');
+                    document.querySelectorAll('.tab')[1].classList.remove('active');
+                }}
+
+                function showMusic() {{
+                    document.querySelector('.news-section').style.display = 'none';
+                    document.querySelector('.music-section').style.display = 'block';
+                    document.querySelectorAll('.tab')[1].classList.add('active');
+                    document.querySelectorAll('.tab')[0].classList.remove('active');
+                }}
 
                 // Скрытие загрузочного экрана
                 setTimeout(() => {{
