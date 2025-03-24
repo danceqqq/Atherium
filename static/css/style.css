@@ -21,7 +21,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    z-index: 10;
+    z-index: 20;
 }
 
 .exit-btn {
@@ -74,7 +74,8 @@ body {
 .news-section {
     flex: 1;
     padding: 40px;
-    z-index: 5;
+    z-index: 10;
+    margin-bottom: 80px; /* Отступ для плашки */
 }
 
 .news-grid {
@@ -107,6 +108,41 @@ body {
     background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7));
 }
 
+/* Музыкальная плашка */
+.music-banner {
+    position: fixed;
+    bottom: 80px; /* Над футером */
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 15;
+    background-size: cover;
+    background-position: center;
+}
+
+.music-content {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+#musicTitle {
+    margin: 0;
+    font-size: 18px;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
 /* Footer */
 .footer {
     position: fixed;
@@ -115,7 +151,7 @@ body {
     right: 0;
     padding: 20px;
     background: rgba(0, 0, 0, 0.2);
-    z-index: 10;
+    z-index: 20;
 }
 
 .input-group {
@@ -154,7 +190,7 @@ body {
     background: rgba(33, 33, 33, 0.9);
     padding: 20px;
     transition: right 0.3s, opacity 0.3s;
-    z-index: 20;
+    z-index: 25;
     opacity: 0;
 }
 
@@ -176,5 +212,15 @@ body {
     .settings-menu {
         right: -100%;
         width: 100%;
+    }
+
+    .music-banner {
+        height: 60px;
+        bottom: 60px;
+    }
+
+    #musicTitle {
+        font-size: 16px;
+        padding: 5px 10px;
     }
 }

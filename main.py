@@ -13,6 +13,7 @@ GITHUB_REPO = "https://raw.githubusercontent.com/danceqqq/Atherium/main/news.jso
 CACHE_DIR = ".cache"
 IMG_CACHE_DIR = "static/img/cached"
 MUSIC_DIR = "music"
+MUSIC_IMG_DIR = "img/music"
 CONFIG_FILE = f"{CACHE_DIR}/config.json"
 
 
@@ -30,7 +31,10 @@ class LauncherWindow(QMainWindow):
         self.player.setAudioOutput(self.audio_output)
         self.player.mediaStatusChanged.connect(self.handle_media_status)
 
-        # Создаем WebView
+        # Текущий трек
+        self.current_music = ""
+
+        # WebView
         self.web_view = QWebEngineView()
         self.setCentralWidget(self.web_view)
 
@@ -41,73 +45,6 @@ class LauncherWindow(QMainWindow):
 
         self.show_loading_screen()
         QTimer.singleShot(3000, self.load_main_content)
-
-    def handle_media_status(self, status):
-        if status == QMediaPlayer.MediaStatus.EndOfMedia:
-            QTimer.singleShot(0, self.load_random_music)
-
-    def load_random_music(self):
-        if os.path.exists(MUSIC_DIR):
-            music_files = [f for f in os.listdir(MUSIC_DIR) if f.endswith(('.mp3', '.wav'))]
-            if music_files:
-                random_music = random.choice(music_files)
-                self.music_path = os.path.abspath(os.path.join(MUSIC_DIR, random_music))
-                self.player.setSource(QUrl.fromLocalFile(self.music_path))
-                self.player.play()
-
-    def load_main_content(self):
-        self.news_data = self.load_news_data(force_update=True)
-        self.cache_images()
-        html_content = self.generate_html()
-        self.web_view.setHtml(html_content, QUrl.fromLocalFile(os.path.abspath("index.html")))
-
-        # Запуск музыки после загрузки
-        QTimer.singleShot(2000, self.start_music)
-
-    def show_loading_screen(self):
-        config = self.load_config()
-        loader_color = config.get("launcher_color", "#562c79")
-
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Загрузка</title>
-            <style>
-                body {{
-                    margin: 0;
-                    padding: 0;
-                    background: {loader_color};
-                }}
-                .loader {{
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    z-index: 100;
-                }}
-                .loader-item {{
-                    width: 80px;
-                    height: 80px;
-                    background: white;
-                    border-radius: 50%;
-                    animation: pulse 1s infinite;
-                }}
-                @keyframes pulse {{
-                    0% {{ transform: scale(0.8); opacity: 0.5; }}
-                    50% {{ transform: scale(1); opacity: 1; }}
-                    100% {{ transform: scale(0.8); opacity: 0.5; }}
-            </style>
-        </head>
-        <body>
-            <div class="loader">
-                <div class="loader-item"></div>
-            </div>
-        </body>
-        </html>
-        """
-        self.web_view.setHtml(html)
 
     def load_news_data(self, force_update=False):
         if not os.path.exists(CACHE_DIR):
@@ -156,6 +93,112 @@ class LauncherWindow(QMainWindow):
                             f.write(img_data)
                     except Exception as e:
                         print(f"Ошибка загрузки изображения {img_url}: {str(e)}")
+
+    def load_random_music(self):
+        if not os.path.exists(MUSIC_DIR):
+            return
+
+        music_files = [f for f in os.listdir(MUSIC_DIR) if f.endswith(('.mp3', '.wav'))]
+        if not music_files:
+            return
+
+        self.current_music = random.choice(music_files)
+        track_name = os.path.splitext(self.current_music)[0]
+        music_path = os.path.abspath(os.path.join(MUSIC_DIR, self.current_music))
+
+        # Поиск обложки
+        cover_url = ""
+        if os.path.exists(MUSIC_IMG_DIR):
+            for ext in ['.jpg', '.jpeg', '.png']:
+                img_path = os.path.join(MUSIC_IMG_DIR, f"{track_name}{ext}")
+                if os.path.exists(img_path):
+                    cover_url = f"file:///{os.path.abspath(img_path).replace('\\', '/')}"
+                    break
+
+        # Обновление интерфейса
+        self.web_view.page().runJavaScript(f"""
+            const musicBanner = document.querySelector('.music-banner');
+            musicBanner.style.backgroundImage = "url('{cover_url}')";
+            document.getElementById('musicTitle').innerText = "{track_name}";
+        """)
+
+        self.player.setSource(QUrl.fromLocalFile(music_path))
+        QTimer.singleShot(1000, self.player.play)
+
+    def update_music_banner(self):
+        track_name = os.path.splitext(self.current_music)[0]
+        cover_url = ""
+
+        # Поиск обложки
+        if os.path.exists(MUSIC_IMG_DIR):
+            for ext in ['.jpg', '.jpeg', '.png']:
+                img_path = os.path.join(MUSIC_IMG_DIR, f"{track_name}{ext}")
+                if os.path.exists(img_path):
+                    cover_url = f"file:///{os.path.abspath(img_path).replace('\\', '/')}"
+                    break
+
+        # Обновление интерфейса
+        self.web_view.page().runJavaScript(f"""
+            const musicBanner = document.querySelector('.music-banner');
+            musicBanner.style.backgroundImage = "url('{cover_url}')";
+            document.getElementById('musicTitle').innerText = "{track_name}";
+        """)
+
+    def handle_media_status(self, status):
+        if status == QMediaPlayer.MediaStatus.EndOfMedia:
+            QTimer.singleShot(0, self.load_random_music)
+
+    def load_main_content(self):
+        self.news_data = self.load_news_data(force_update=True)
+        self.cache_images()
+        html_content = self.generate_html()
+        self.web_view.setHtml(html_content, QUrl.fromLocalFile(os.path.abspath("index.html")))
+        QTimer.singleShot(2000, self.start_music)
+
+    def show_loading_screen(self):
+        config = self.load_config()
+        loader_color = config.get("launcher_color", "#562c79")
+
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Загрузка</title>
+            <style>
+                body {{
+                    margin: 0;
+                    padding: 0;
+                    background: {loader_color};
+                }}
+                .loader {{
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: 100;
+                }}
+                .loader-item {{
+                    width: 80px;
+                    height: 80px;
+                    background: white;
+                    border-radius: 50%;
+                    animation: pulse 1s infinite;
+                }}
+                @keyframes pulse {{
+                    0% {{ transform: scale(0.8); opacity: 0.5; }}
+                    50% {{ transform: scale(1); opacity: 1; }}
+                    100% {{ transform: scale(0.8); opacity: 0.5; }}
+            </style>
+        </head>
+        <body>
+            <div class="loader">
+                <div class="loader-item"></div>
+            </div>
+        </body>
+        </html>
+        """
+        self.web_view.setHtml(html)
 
     def generate_html(self):
         config = self.load_config()
@@ -211,6 +254,13 @@ class LauncherWindow(QMainWindow):
                     html += "<div class='news-card'><p>Отсутствует image_url</p></div>"
 
         html += f"""
+                </div>
+            </div>
+
+            <!-- Музыкальная плашка -->
+            <div class="music-banner">
+                <div class="music-content">
+                    <h3 id="musicTitle">Музыка загружается...</h3>
                 </div>
             </div>
 
@@ -341,7 +391,6 @@ class LauncherWindow(QMainWindow):
         try:
             with open(CONFIG_FILE, "r") as f:
                 config = json.load(f)
-                # Исправленная валидация
                 config["music_volume"] = min(max(int(config.get("music_volume", 50)), 0), 100)
                 return config
         except Exception as e:
