@@ -11,6 +11,7 @@ from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 GITHUB_REPO = "https://raw.githubusercontent.com/danceqqq/Atherium/main/news.json"
+GITHUB_COMMITS_API = "https://api.github.com/repos/danceqqq/Atherium/commits?per_page=4"
 CACHE_DIR = ".cache"
 IMG_CACHE_DIR = "static/img/cached"
 MUSIC_DIR = "music"
@@ -119,6 +120,36 @@ class LauncherWindow(QMainWindow):
 
         return music_list
 
+    def load_github_commits(self):
+        try:
+            response = requests.get(GITHUB_COMMITS_API, timeout=5)
+            response.raise_for_status()
+            commits = response.json()
+            commits_html = ""
+
+            for commit in commits[:4]:
+                message = commit['commit']['message']
+                author = commit['commit']['author']['name']
+                date = datetime.strptime(commit['commit']['author']['date'], "%Y-%m-%dT%H:%M:%SZ").strftime(
+                    "%d.%m.%Y %H:%M")
+
+                commits_html += f"""
+                <div class="commit-card">
+                    <div class="commit-header">
+                        <div class="commit-info">
+                            <div class="commit-author">{author}</div>
+                            <div class="commit-date">{date}</div>
+                        </div>
+                    </div>
+                    <div class="commit-message">{message}</div>
+                </div>
+                """
+
+            return commits_html
+        except Exception as e:
+            print(f"Ошибка загрузки коммитов: {str(e)}")
+            return "<p>Не удалось загрузить обновления</p>"
+
     def load_random_music(self):
         music_list = self.load_music_list()
         if not music_list:
@@ -170,6 +201,7 @@ class LauncherWindow(QMainWindow):
         self.news_data = self.load_news_data(force_update=True)
         self.cache_images()
         self.music_list = self.load_music_list()
+        self.github_commits = self.load_github_commits()
         html_content = self.generate_html()
         self.web_view.setHtml(html_content, QUrl.fromLocalFile(os.path.abspath("index.html")))
         QTimer.singleShot(2000, self.start_music)
@@ -276,16 +308,16 @@ class LauncherWindow(QMainWindow):
         <body style="background: {color}; overflow: hidden;">
             <!-- Верхняя панель -->
             <div class="top-bar">
-                <div class="exit-btn" onclick="closeLauncher()">×</div>
+                <!-- Пустой placeholder для выравнивания -->
             </div>
 
             <!-- Вкладки -->
             <div class="tabs">
-                <div class="tab active" onclick="showNews()">
+                <div class="tab active" onclick="showMain()">
                     <svg class="tab-icon" viewBox="0 0 24 24">
-                        <path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"/>
+                        <path d="M3 17h18v-2H3v2zm0 3h18v-1H3v1zm0-7h18v-3H3v3zm4-3v2H5v-2h2zm0-4v2H5V7h2zm4 0v2H9V7h2zm4 0v2h-2V7h2zm4 0v2h-2V7h2zm-8 4v2h-2v-2h2zm0 4v2h-2v-2h2zm0 4v2h-2v-2h2zm8-8v2h-2v-2h2zm0 4v2h-2v-2h2zm0 4v2h-2v-2h2z"/>
                     </svg>
-                    <span class="tab-text">Новости и релизы</span>
+                    <span class="tab-text">Главная страница</span>
                 </div>
                 <div class="tab" onclick="showMusic()">
                     <svg class="tab-icon" viewBox="0 0 24 24">
@@ -299,11 +331,23 @@ class LauncherWindow(QMainWindow):
                     </svg>
                     <span class="tab-text">Обратная связь</span>
                 </div>
+                <div class="tab" onclick="showGitHub()">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 10.93 9.07 20 20 20s20-9.07 20-20S22.93 0 12 0zm4 16c0 1.11-.89 2-2 2s-2-.89-2-2 .89-2 2-2 2 1.11 2 2zm-6 0c0 1.11-.89 2-2 2s-2-.89-2-2 .89-2 2-2 2 1.11 2 2zm6-8c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4zm-6 0c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4zm10 4c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z"/>
+                    </svg>
+                    <span class="tab-text">GitHub</span>
+                </div>
+                <div class="tab exit-tab" onclick="closeLauncher()">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                    </svg>
+                    <span class="tab-text">Выход</span>
+                </div>
             </div>
 
-            <!-- Секция новостей -->
-            <div class="news-section active-section">
-                <div class="news-container">
+            <!-- Секция главной страницы -->
+            <div class="main-section active-section">
+                <div class="main-container">
                     <div class="news-grid">
                         {news_cards_html}
                     </div>
@@ -339,6 +383,16 @@ class LauncherWindow(QMainWindow):
             <div class="feedback-section">
                 <h2>Обратная связь</h2>
                 <p>Этот раздел находится в разработке</p>
+            </div>
+
+            <!-- Секция GitHub -->
+            <div class="github-section">
+                <div class="github-container">
+                    <h2>Последние обновления</h2>
+                    <div class="commits-list">
+                        {self.github_commits}
+                    </div>
+                </div>
             </div>
 
             <!-- Footer -->
@@ -384,25 +438,36 @@ class LauncherWindow(QMainWindow):
                 }});
 
                 // Переключение вкладок
-                function showNews() {{
-                    document.querySelector('.news-section').style.display = 'block';
+                function showMain() {{
+                    document.querySelector('.main-section').style.display = 'block';
                     document.querySelector('.music-section').style.display = 'none';
                     document.querySelector('.feedback-section').style.display = 'none';
+                    document.querySelector('.github-section').style.display = 'none';
                     setActiveTab(0);
                 }}
 
                 function showMusic() {{
-                    document.querySelector('.news-section').style.display = 'none';
+                    document.querySelector('.main-section').style.display = 'none';
                     document.querySelector('.music-section').style.display = 'block';
                     document.querySelector('.feedback-section').style.display = 'none';
+                    document.querySelector('.github-section').style.display = 'none';
                     setActiveTab(1);
                 }}
 
                 function showFeedback() {{
-                    document.querySelector('.news-section').style.display = 'none';
+                    document.querySelector('.main-section').style.display = 'none';
                     document.querySelector('.music-section').style.display = 'none';
                     document.querySelector('.feedback-section').style.display = 'block';
+                    document.querySelector('.github-section').style.display = 'none';
                     setActiveTab(2);
+                }}
+
+                function showGitHub() {{
+                    document.querySelector('.main-section').style.display = 'none';
+                    document.querySelector('.music-section').style.display = 'none';
+                    document.querySelector('.feedback-section').style.display = 'none';
+                    document.querySelector('.github-section').style.display = 'block';
+                    setActiveTab(3);
                 }}
 
                 function setActiveTab(index) {{
