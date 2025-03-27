@@ -23,6 +23,7 @@ body {
     align-items: center;
     justify-content: flex-end;
     z-index: 20;
+    box-sizing: border-box;
 }
 
 .exit-btn {
@@ -52,51 +53,68 @@ body {
     display: flex;
     background: rgba(0, 0, 0, 0.2);
     z-index: 18;
+    padding: 0 20px;
+    height: 60px;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 .tab {
-    padding: 15px 20px;
+    position: relative;
+    padding: 15px 10px;
     cursor: pointer;
-    transition: background 0.3s;
-    font-weight: bold;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    border-radius: 10px;
+    margin: 0 5px;
+    height: 40px;
+    min-width: 40px;
+    overflow: hidden;
 }
 
 .tab.active {
     background: rgba(255, 255, 255, 0.1);
+    padding-right: 20px;
 }
 
-/* Загрузочный экран */
-.loader {
-    position: fixed;
-    top: 0;
+.tab:hover {
+    padding-right: 20px;
+}
+
+.tab-icon {
+    width: 24px;
+    height: 24px;
+    fill: white;
+    transition: transform 0.3s;
+}
+
+.tab-text {
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.3s;
+    margin-left: 10px;
+    font-weight: bold;
+    color: white;
+    position: relative;
+    left: -100%;
+}
+
+.tab:hover .tab-text,
+.tab.active .tab-text {
     left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    background: #000;
+    opacity: 1;
 }
 
-.loader-item {
-    width: 80px;
-    height: 80px;
-    background: white;
-    border-radius: 50%;
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(0.8); opacity: 0.5; }
-    50% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(0.8); opacity: 0.5; }
+.tab:hover .tab-icon,
+.tab.active .tab-icon {
+    transform: translateX(10px);
 }
 
 /* Секция новостей */
 .news-section {
     flex: 1;
-    padding: 60px 40px 80px;
+    padding: 100px 40px 180px;
     z-index: 10;
     display: block;
     transition: opacity 0.3s;
@@ -110,40 +128,151 @@ body {
     display: none;
 }
 
-.news-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 50px;
-    margin-top: 30px;
+.news-container {
+    display: flex;
+    gap: 15px;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    height: calc(100vh - 400px);
 }
 
-.news-card {
-    height: 300px;
+.news-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    flex: 1;
+}
+
+/* Новостные карточки */
+.card {
+    width: 340px;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
     border-radius: 15px;
     overflow: hidden;
-    cursor: pointer;
-    background-size: cover;
-    position: relative;
+    perspective: 1000px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.news-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
-.news-content {
+.card__content {
     position: absolute;
     bottom: 0;
     left: 0;
-    right: 0;
+    width: 100%;
+    height: 100%;
     padding: 20px;
-    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.7));
+    box-sizing: border-box;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    transform: translateY(100%);
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.card:hover .card__content {
+    transform: translateY(0);
+}
+
+.card__title {
+    margin: 0;
+    font-size: 18px;
+    color: white;
+    font-weight: 700;
+    transition: color 0.3s;
+}
+
+.card__description {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.4;
+    transition: color 0.3s;
+}
+
+/* Виджет времени */
+.time-card {
+    width: 280px;
+    height: 300px;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.time-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+}
+
+.time-content {
+    text-align: center;
+}
+
+.time-text {
+    font-size: 64px;
+    margin: 0;
+    font-weight: 600;
+    color: white;
+}
+
+.day-text {
+    font-size: 18px;
+    margin: 5px 0 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+/* Музыкальная плашка */
+.music-banner-container {
+    position: relative;
+    margin-top: 20px;
+    height: 120px;
+}
+
+.music-banner {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 16;
+    border-radius: 15px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    transition: all 0.3s;
+}
+
+.music-content {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+#musicTitle {
+    margin: 0;
+    font-size: 18px;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 5px;
+    text-align: center;
 }
 
 /* Секция музыки */
 .music-section {
     flex: 1;
-    padding: 60px 40px 80px;
+    padding: 100px 40px 120px;
     z-index: 10;
     display: none;
     transition: opacity 0.3s;
@@ -165,7 +294,7 @@ body {
     max-width: 600px;
     margin: 0 auto;
     overflow-y: auto;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 300px);
 }
 
 .music-list {
@@ -202,38 +331,19 @@ body {
     font-size: 16px;
 }
 
-/* Музыкальная плашка */
-.music-banner {
-    position: fixed;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    height: 80px;
-    background: #222;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 15;
-    background-size: cover;
-    background-position: center;
-    transition: all 0.3s;
-}
-
-.music-content {
-    position: relative;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px;
-}
-
-#musicTitle {
-    margin: 0;
-    font-size: 18px;
-    padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 5px;
+/* Секция обратной связи */
+.feedback-section {
+    flex: 1;
+    padding: 100px 40px 120px;
+    z-index: 10;
+    display: none;
+    transition: opacity 0.3s;
     text-align: center;
+}
+
+.feedback-section.active-section {
+    display: block;
+    opacity: 1;
 }
 
 /* Footer */
@@ -244,7 +354,8 @@ body {
     right: 0;
     padding: 20px;
     background: rgba(0, 0, 0, 0.2);
-    z-index: 20;
+    z-index: 17;
+    box-sizing: border-box;
 }
 
 .input-group {
@@ -298,23 +409,75 @@ body {
     border: 1px solid white;
     cursor: pointer;
     margin: 10px 0;
+    border-radius: 5px;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
     .tabs {
         flex-direction: column;
-        align-items: center;
+        align-items: flex-start;
+        height: auto;
+        padding: 20px;
+    }
+
+    .tab {
+        width: 100%;
+        margin: 5px 0;
+        height: 40px;
+        min-width: 0;
+        justify-content: flex-start;
+    }
+
+    .tab.active,
+    .tab:hover {
+        padding-right: 20px;
+    }
+
+    .tab-text {
+        opacity: 1;
+        left: 0;
+        margin-left: 10px;
+    }
+
+    .tab:hover .tab-text {
+        opacity: 1;
+    }
+
+    .tab:hover .tab-icon,
+    .tab.active .tab-icon {
+        transform: none;
+    }
+
+    .news-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .card, .time-card {
+        width: 100%;
+        height: 200px;
+    }
+
+    .time-card {
+        height: 240px;
+    }
+
+    .music-banner-container {
+        margin-top: 15px;
     }
 
     .music-banner {
-        height: 60px;
-        bottom: 60px;
+        bottom: 120px;
+        height: 100px;
     }
 
-    #musicTitle {
-        font-size: 16px;
-        padding: 5px 10px;
+    .feedback-section {
+        padding: 80px 20px 120px;
+    }
+
+    .news-section, .music-section {
+        padding: 100px 20px 180px;
     }
 
     .music-track {
@@ -327,8 +490,4 @@ body {
         width: 100px;
         height: 100px;
     }
-
-    .news-section, .music-section {{
-        padding: 60px 20px 80px;
-    }}
 }

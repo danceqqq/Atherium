@@ -3,6 +3,7 @@ import json
 import os
 import random
 import requests
+from datetime import datetime
 from PySide6.QtWidgets import QApplication, QMainWindow, QColorDialog
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl, Slot, QTimer, Qt
@@ -147,6 +148,9 @@ class LauncherWindow(QMainWindow):
             (function() {{
                 const musicBanner = document.querySelector('.music-banner');
                 musicBanner.style.backgroundImage = "url('{track_info['cover_url']}')";
+                musicBanner.style.backgroundSize = "cover";
+                musicBanner.style.backgroundPosition = "center";
+                musicBanner.style.borderRadius = "15px";
                 document.getElementById('musicTitle').innerText = "{track_info['track_name']}";
 
                 document.querySelectorAll('.music-track').forEach(track => {{
@@ -233,6 +237,31 @@ class LauncherWindow(QMainWindow):
             </div>
             """
 
+        news_cards_html = ""
+        if not self.news_data:
+            news_cards_html = "<p>Нет новостей</p>"
+        else:
+            for item in self.news_data:
+                img_url = item.get("image_url", "")
+                img_path = ""
+                if img_url:
+                    img_name = os.path.basename(img_url)
+                    img_path = os.path.abspath(os.path.join(IMG_CACHE_DIR, img_name)).replace("\\", "/")
+                    if not os.path.exists(img_path):
+                        img_path = os.path.abspath("static/img/no_news.png").replace("\\", "/")
+
+                title = item.get('title', 'Нет заголовка')
+                text = item.get('text', 'Нет описания')[:150] + "..."
+
+                news_cards_html += f"""
+                <div class="card" style="background-image: url('file:///{img_path}');">
+                    <div class="card__content">
+                        <p class="card__title">{title}</p>
+                        <p class="card__description">{text}</p>
+                    </div>
+                </div>
+                """
+
         html = f"""
         <!DOCTYPE html>
         <html>
@@ -252,39 +281,45 @@ class LauncherWindow(QMainWindow):
 
             <!-- Вкладки -->
             <div class="tabs">
-                <div class="tab active" onclick="showNews()">Новости и релизы</div>
-                <div class="tab" onclick="showMusic()">Музыка</div>
+                <div class="tab active" onclick="showNews()">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"/>
+                    </svg>
+                    <span class="tab-text">Новости и релизы</span>
+                </div>
+                <div class="tab" onclick="showMusic()">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-8z"/>
+                    </svg>
+                    <span class="tab-text">Музыка</span>
+                </div>
+                <div class="tab" onclick="showFeedback()">
+                    <svg class="tab-icon" viewBox="0 0 24 24">
+                        <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    </svg>
+                    <span class="tab-text">Обратная связь</span>
+                </div>
             </div>
 
             <!-- Секция новостей -->
             <div class="news-section active-section">
-                <h2>Новости и релизы</h2>
-                <div class="news-grid">
-        """
-
-        if not self.news_data:
-            html += "<p>Нет новостей</p>"
-        else:
-            for item in self.news_data:
-                img_url = item.get("image_url", "")
-                if img_url:
-                    img_name = os.path.basename(img_url)
-                    img_path = os.path.abspath(os.path.join(IMG_CACHE_DIR, img_name)).replace("\\", "/")
-                    if os.path.exists(img_path):
-                        html += f"""
-                        <div class="news-card" style="background-image: url('file:///{img_path}');">
-                            <div class="news-content">
-                                <h3>{item.get('title', 'Нет заголовка')}</h3>
-                                <p>{item.get('text', 'Нет описания')}</p>
-                            </div>
+                <div class="news-container">
+                    <div class="news-grid">
+                        {news_cards_html}
+                    </div>
+                    <div class="time-card">
+                        <div class="time-content">
+                            <p class="time-text" id="currentTime">00:00</p>
+                            <p class="day-text" id="currentDate">Загрузка...</p>
                         </div>
-                        """
-                    else:
-                        html += "<div class='news-card'><p>Ошибка загрузки изображения</p></div>"
-                else:
-                    html += "<div class='news-card'><p>Отсутствует image_url</p></div>"
-
-        html += """
+                    </div>
+                </div>
+                <div class="music-banner-container">
+                    <div class="music-banner">
+                        <div class="music-content">
+                            <h3 id="musicTitle">Музыка загружается...</h3>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -295,16 +330,15 @@ class LauncherWindow(QMainWindow):
                 </div>
                 <div class="music-list-container">
                     <div class="music-list">
-        """ + music_list_html + """
+                        {music_list_html}
                     </div>
                 </div>
             </div>
 
-            <!-- Музыкальная плашка -->
-            <div class="music-banner">
-                <div class="music-content">
-                    <h3 id="musicTitle">Музыка загружается...</h3>
-                </div>
+            <!-- Секция обратной связи -->
+            <div class="feedback-section">
+                <h2>Обратная связь</h2>
+                <p>Этот раздел находится в разработке</p>
             </div>
 
             <!-- Footer -->
@@ -353,21 +387,57 @@ class LauncherWindow(QMainWindow):
                 function showNews() {{
                     document.querySelector('.news-section').style.display = 'block';
                     document.querySelector('.music-section').style.display = 'none';
-                    document.querySelectorAll('.tab')[0].classList.add('active');
-                    document.querySelectorAll('.tab')[1].classList.remove('active');
+                    document.querySelector('.feedback-section').style.display = 'none';
+                    setActiveTab(0);
                 }}
 
                 function showMusic() {{
                     document.querySelector('.news-section').style.display = 'none';
                     document.querySelector('.music-section').style.display = 'block';
-                    document.querySelectorAll('.tab')[1].classList.add('active');
-                    document.querySelectorAll('.tab')[0].classList.remove('active');
+                    document.querySelector('.feedback-section').style.display = 'none';
+                    setActiveTab(1);
+                }}
+
+                function showFeedback() {{
+                    document.querySelector('.news-section').style.display = 'none';
+                    document.querySelector('.music-section').style.display = 'none';
+                    document.querySelector('.feedback-section').style.display = 'block';
+                    setActiveTab(2);
+                }}
+
+                function setActiveTab(index) {{
+                    document.querySelectorAll('.tab').forEach((tab, i) => {{
+                        tab.classList.toggle('active', i === index);
+                    }});
                 }}
 
                 // Скрытие загрузочного экрана
                 setTimeout(() => {{
                     document.querySelector('.loader')?.remove();
                 }}, 3000);
+
+                // Обновление времени
+                function updateTime() {{
+                    const now = new Date();
+                    const timeElement = document.getElementById('currentTime');
+                    const dateElement = document.getElementById('currentDate');
+
+                    const hours = now.getHours().toString().padStart(2, '0');
+                    const minutes = now.getMinutes().toString().padStart(2, '0');
+                    const timeString = `${{hours}}:${{minutes}}`;
+
+                    const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'];
+                    const months = ['Января', 'Февраля', 'Марта', 'Апреля', 'Мая', 'Июня', 
+                                   'Июля', 'Августа', 'Сентября', 'Октября', 'Ноября', 'Декабря'];
+
+                    const day = days[now.getDay()];
+                    const date = now.getDate();
+                    const month = months[now.getMonth()];
+                    const dateString = `${{day}}, ${{date}} ${{month}}`;
+
+                    timeElement.textContent = timeString;
+                    dateElement.textContent = dateString;
+                }}
 
                 // Сохранение конфига
                 function saveConfig() {{
@@ -411,6 +481,10 @@ class LauncherWindow(QMainWindow):
                         saveConfig();
                     }});
                 }}
+
+                // Инициализация времени
+                setInterval(updateTime, 1000);
+                setTimeout(updateTime, 100); // Первый запуск
             </script>
         </body>
         </html>
