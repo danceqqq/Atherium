@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting...</title>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const redirectUrl = `atherium://oauth/callback?${params.toString()}`;
+        window.location.href = redirectUrl;
+    </script>
+</head>
+<body>
+    <h1>Redirecting to launcher...</h1>
+</body>
+</html>
