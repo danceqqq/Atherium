@@ -3,18 +3,23 @@
 <head>
     <title>Авторизация</title>
     <script>
+        // Передаем код обратно в лаунчер через window.opener
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
         const state = params.get('state');
         
-        if(code && state) {{
-            // Закрываем окно после получения кода
+        if(code && state && window.opener) {
+            window.opener.postMessage({
+                type: 'ely_auth_response',
+                code: code,
+                state: state
+            }, '*');
             window.close();
-        }}
+        }
     </script>
 </head>
 <body>
-    <h1>Авторизация через Ely.by прошла успешно</h1>
-    <p>Можете закрыть это окно</p>
+    <h1>Авторизация через Ely.by</h1>
+    <p>Идет перенаправление...</p>
 </body>
 </html>
