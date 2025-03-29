@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Redirecting...</title>
+    <title>Авторизация</title>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const redirectUrl = `atherium://oauth/callback?${params.toString()}`;
-        window.location.href = redirectUrl;
+        const code = params.get('code');
+        const state = params.get('state');
+        
+        if(code && state) {{
+            // Закрываем окно после получения кода
+            window.close();
+        }}
     </script>
 </head>
 <body>
-    <h1>Redirecting to launcher...</h1>
+    <h1>Авторизация через Ely.by прошла успешно</h1>
+    <p>Можете закрыть это окно</p>
 </body>
 </html>
