@@ -1,9 +1,9 @@
 danceq
 danber4ik
 AtheriumTester
-.jpg
+default.jpg
 
 123
 123
 AtheriumTester
-.jpg
+default.jpg
